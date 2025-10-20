@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情 - 女友生气管理系统</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B8B',    // 主色调：温暖粉色
+                        secondary: '#FFB6C1',  // 辅助色：浅粉色
+                        accent: '#FF85A1',     // 强调色：亮粉色
+                        neutral: '#FFF5F7',    // 背景色：极浅粉色
+                        dark: '#5A4B50'        // 文本深色
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'system-ui', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 15px -3px rgba(255, 107, 139, 0.1), 0 4px 6px -2px rgba(255, 107, 139, 0.05);
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-custom {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-neutral min-h-screen font-sans text-dark antialiased">
+<!-- 导航栏 -->
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm transition-custom">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <i class="fa fa-heart text-primary text-2xl animate-pulse"></i>
+            <h1 class="text-xl md:text-2xl font-bold text-primary">心情</h1>
+        </div>
+
+        <nav class="hidden md:flex items-center space-x-6">
+            <a href="#" class="font-medium hover:text-primary transition-custom" id="nav-home">首页</a>
+            <a href="#" class="font-medium hover:text-primary transition-custom" id="nav-records">生气记录</a>
+            <a href="#" class="font-medium hover:text-primary transition-custom" id="nav-about">关于</a>
+            <button id="loginBtn" class="px-4 py-2 border border-primary text-primary rounded-full hover:bg-primary/5 transition-custom">登录</button>
+            <button id="registerBtn" class="px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-custom">注册</button>
+            <div id="userMenu" class="hidden flex items-center space-x-3">
+                <span id="usernameDisplay" class="font-medium"></span>
+                <button id="logoutBtn" class="text-sm text-gray-500 hover:text-primary transition-custom">
+                    <i class="fa fa-sign-out"></i>
+                </button>
+            </div>
+        </nav>
+
+        <button class="md:hidden text-xl" id="mobileMenuBtn">
+            <i class="fa fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- 移动端菜单 -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
+        <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+            <a href="#" class="py-2 hover:text-primary transition-custom" id="mobile-nav-home">首页</a>
+            <a href="#" class="py-2 hover:text-primary transition-custom" id="mobile-nav-records">生气记录</a>
+            <a href="#" class="py-2 hover:text-primary transition-custom" id="mobile-nav-about">关于</a>
+            <button id="mobile-loginBtn" class="py-2 text-left border-b border-gray-100">登录</button>
+            <button id="mobile-registerBtn" class="py-2 text-left">注册</button>
+            <div id="mobile-userMenu" class="hidden flex flex-col space-y-3 py-2">
+                <span id="mobile-usernameDisplay" class="font-medium"></span>
+                <button id="mobile-logoutBtn" class="text-left text-sm text-gray-500 hover:text-primary transition-custom">
+                    <i class="fa fa-sign-out mr-1"></i> 退出登录
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- 主内容区 -->
+<main class="container mx-auto px-4 py-8">
+    <!-- 首页/未登录视图 -->
+    <section id="homeView" class="py-8">
+        <div class="max-w-3xl mx-auto text-center mb-12">
+            <h2 class="text-[clamp(2rem,5vw,3rem)] font-bold text-primary mb-4 text-shadow">
+                记录每一次情绪，<br>让爱更懂彼此
+            </h2>
+            <p class="text-lg text-gray-600 mb-8">
+                忘记她为什么生气了？别担心，心晴帮你记录每一个细节，<br>让你更好地理解她，避免重复犯错
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button id="hero-registerBtn" class="px-6 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition-custom shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    开始记录 <i class="fa fa-arrow-right ml-2"></i>
+                </button>
+                <button id="hero-loginBtn" class="px-6 py-3 border border-primary text-primary rounded-full hover:bg-primary/5 transition-custom">
+                    已有账号？登录
+                </button>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
+            <div class="bg-white rounded-xl p-6 text-center card-shadow hover:-translate-y-2 transition-custom">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa fa-book text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">详细记录</h3>
+                <p class="text-gray-600">记录生气的时间、原因和解决方法，避免重蹈覆辙</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 text-center card-shadow hover:-translate-y-2 transition-custom">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa fa-line-chart text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">情绪分析</h3>
+                <p class="text-gray-600">分析生气频率和主要原因，帮助你更好地理解对方</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 text-center card-shadow hover:-translate-y-2 transition-custom">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa fa-gift text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">暖心建议</h3>
+                <p class="text-gray-600">根据生气原因提供安抚建议，助你快速哄好她</p>
+            </div>
+        </div>
+
+        <div class="max-w-3xl mx-auto bg-white rounded-2xl p-6 md:p-8 card-shadow">
+            <div class="text-center mb-6">
+                <h3 class="text-2xl font-bold text-primary mb-2">如何使用</h3>
+                <p class="text-gray-600">简单三步，轻松管理情绪记录</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">1</div>
+                    <h4 class="font-bold mb-2">注册账号</h4>
+                    <p class="text-sm text-gray-600">创建你的专属账号，数据安全保存</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">2</div>
+                    <h4 class="font-bold mb-2">记录事件</h4>
+                    <p class="text-sm text-gray-600">每次发生后及时记录，不错过细节</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">3</div>
+                    <h4 class="font-bold mb-2">总结学习</h4>
+                    <p class="text-sm text-gray-600">定期查看，总结经验，避免再犯</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 记录列表视图 -->
+    <section id="recordsView" class="hidden">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-bold text-primary mb-2">生气记录</h2>
+                <p class="text-gray-600">已记录 <span id="recordCount">0</span> 次事件</p>
+            </div>
+            <button id="addRecordBtn" class="px-5 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-custom flex items-center">
+                <i class="fa fa-plus mr-2"></i> 新增记录
+            </button>
+        </div>
+
+        <!-- 筛选和搜索 -->
+        <div class="bg-white rounded-xl p-4 mb-6 card-shadow">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <input type="text" id="searchRecords" placeholder="搜索记录..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <select id="filterMonth" class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <option value="all">所有月份</option>
+                        <option value="current">本月</option>
+                        <option value="last">上月</option>
+                    </select>
+                    <select id="filterSeverity" class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <option value="all">所有程度</option>
+                        <option value="mild">轻微</option>
+                        <option value="medium">中等</option>
+                        <option value="severe">严重</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 记录列表 -->
+        <div id="recordsContainer" class="space-y-4">
+            <!-- 记录为空状态 -->
+            <div id="emptyRecords" class="bg-white rounded-xl p-8 text-center card-shadow">
+                <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa fa-folder-open text-primary text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">还没有记录</h3>
+                <p class="text-gray-600 mb-6">点击"新增记录"按钮添加第一条生气记录吧</p>
+                <button id="empty-addRecordBtn" class="px-5 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-custom">
+                    <i class="fa fa-plus mr-2"></i> 新增记录
+                </button>
+            </div>
+
+            <!-- 记录列表将通过JavaScript动态生成 -->
+        </div>
+    </section>
+
+    <!-- 关于页面 -->
+    <section id="aboutView" class="hidden max-w-3xl mx-auto">
+        <h2 class="text-2xl md:text-3xl font-bold text-primary mb-6">关于心晴</h2>
+
+        <div class="bg-white rounded-xl p-6 mb-6 card-shadow">
+            <h3 class="text-xl font-bold mb-3">什么是心晴？</h3>
+            <p class="text-gray-600 mb-4">
+                心晴是一款专为情侣设计的情绪记录工具，帮助你记录和管理女友的生气事件，
+                让你更好地理解对方的情绪和需求，减少不必要的争吵，增进彼此感情。
+            </p>
+            <p class="text-gray-600">
+                我们相信，理解是爱情的基石。通过记录和反思，你将更懂得如何与伴侣相处，
+                让爱情在理解中升温。
+            </p>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 mb-6 card-shadow">
+            <h3 class="text-xl font-bold mb-3">为什么需要记录？</h3>
+            <ul class="space-y-3 text-gray-600">
+                <li class="flex items-start">
+                    <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                    <span>避免重复犯同样的错误，减少不必要的争吵</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                    <span>更好地理解对方的底线和敏感点</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                    <span>发现情绪规律，提前预防可能的冲突</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                    <span>记录解决方法，下次能更快地平复情绪</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 card-shadow">
+            <h3 class="text-xl font-bold mb-3">使用小贴士</h3>
+            <ul class="space-y-3 text-gray-600">
+                <li class="flex items-start">
+                    <i class="fa fa-lightbulb-o text-primary mt-1 mr-2"></i>
+                    <span>尽量在事件发生后尽快记录，细节会更准确</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fa fa-lightbulb-o text-primary mt-1 mr-2"></i>
+                    <span>记录时保持客观，不要只记录对方的反应</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fa fa-lightbulb-o text-primary mt-1 mr-2"></i>
+                    <span>定期回顾记录，总结经验教训</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fa fa-lightbulb-o text-primary mt-1 mr-2"></i>
+                    <span>不要让对方觉得你在"记仇"，而是在"学习如何更好地爱她"</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+</main>
+
+<!-- 登录模态框 -->
+<div id="loginModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl w-full max-w-md mx-4 shadow-2xl transform transition-all scale-95 opacity-0" id="loginModalContent">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h3 class="text-xl font-bold text-primary">登录账号</h3>
+            <button id="closeLoginModal" class="text-gray-500 hover:text-primary transition-custom">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">用户名</label>
+                    <input type="text" id="loginUsername" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入用户名" required>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-1">密码</label>
+                    <input type="password" id="loginPassword" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入密码" required>
+                </div>
+
+                <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-lg font-medium transition-custom">
+                    登录
+                </button>
+
+                <div class="mt-4 text-center text-sm">
+                    <span class="text-gray-600">还没有账号？</span>
+                    <button type="button" id="switchToRegister" class="text-primary hover:underline ml-1">立即注册</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 注册模态框 -->
+<div id="registerModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl w-full max-w-md mx-4 shadow-2xl transform transition-all scale-95 opacity-0" id="registerModalContent">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h3 class="text-xl font-bold text-primary">注册账号</h3>
+            <button id="closeRegisterModal" class="text-gray-500 hover:text-primary transition-custom">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <form id="registerForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">用户名</label>
+                    <input type="text" id="registerUsername" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请设置用户名" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">密码</label>
+                    <input type="password" id="registerPassword" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请设置密码（至少6位）" minlength="6" required>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-1">确认密码</label>
+                    <input type="password" id="registerConfirmPassword" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请再次输入密码" required>
+                </div>
+
+                <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-lg font-medium transition-custom">
+                    注册
+                </button>
+
+                <div class="mt-4 text-center text-sm">
+                    <span class="text-gray-600">已有账号？</span>
+                    <button type="button" id="switchToLogin" class="text-primary hover:underline ml-1">立即登录</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 添加记录模态框 -->
+<div id="addRecordModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl w-full max-w-2xl mx-4 shadow-2xl transform transition-all scale-95 opacity-0" id="addRecordModalContent">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h3 class="text-xl font-bold text-primary">添加生气记录</h3>
+            <button id="closeAddRecordModal" class="text-gray-500 hover:text-primary transition-custom">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <form id="addRecordForm">
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">日期</label>
+                        <input type="date" id="recordDate" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">生气程度</label>
+                        <select id="recordSeverity" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                            <option value="">请选择</option>
+                            <option value="mild">轻微 - 有点不开心</option>
+                            <option value="medium">中等 - 明显生气了</option>
+                            <option value="severe">严重 - 非常生气</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">生气原因</label>
+                    <textarea id="recordReason" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="详细描述一下是什么事情导致她生气..." required></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">她的反应</label>
+                    <textarea id="recordReaction" rows="2" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="她当时的表现、说的话等..."></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-1">如何解决的</label>
+                    <textarea id="recordSolution" rows="2" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="你做了什么让她消气的？或者最后怎么解决的..."></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-1">备注（可选）</label>
+                    <textarea id="recordNotes" rows="2" class="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="其他需要记录的信息，比如以后如何避免等..."></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-lg font-medium transition-custom">
+                    保存记录
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 记录详情模态框 -->
+<div id="recordDetailModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl w-full max-w-2xl mx-4 shadow-2xl transform transition-all scale-95 opacity-0" id="recordDetailModalContent">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h3 class="text-xl font-bold text-primary">记录详情</h3>
+            <div>
+                <button id="editRecordBtn" class="text-gray-500 hover:text-primary transition-custom mr-3">
+                    <i class="fa fa-pencil text-xl"></i>
+                </button>
+                <button id="deleteRecordBtn" class="text-gray-500 hover:text-red-500 transition-custom">
+                    <i class="fa fa-trash text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-4" id="recordDetailContent">
+            <!-- 详情内容将通过JavaScript动态生成 -->
+        </div>
+    </div>
+</div>
+
+<!-- 成功提示 -->
+<div id="toast" class="fixed bottom-6 right-6 bg-primary text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-custom flex items-center">
+    <i class="fa fa-check-circle mr-2"></i>
+    <span id="toastMessage"></span>
+</div>
+
+<!-- 页脚 -->
+<footer class="bg-white mt-16 py-8 border-t">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                <i class="fa fa-heart text-primary text-xl"></i>
+                <span class="font-bold text-primary">心晴</span>
+            </div>
+
+            <div class="text-sm text-gray-500">
+                © 2023 心情 - 让爱情更懂彼此
+            </div>
+
+            <div class="flex space-x-4 mt-4 md:mt-0">
+                <a href="#" class="text-gray-400 hover:text-primary transition-custom" id="footer-about">
+                    <i class="fa fa-info-circle"></i> 关于
+                </a>
+                <a href="#" class="text-gray-400 hover:text-primary transition-custom">
+                    <i class="fa fa-envelope"></i> 反馈
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // 全局状态
+    const state = {
+        currentUser: null,
+        records: [],
+        currentView: 'home',
+        editingRecordId: null
+    };
+
+    // DOM元素
+    const views = {
+        home: document.getElementById('homeView'),
+        records: document.getElementById('recordsView'),
+        about: document.getElementById('aboutView')
+    };
+
+    const modals = {
+        login: {
+            container: document.getElementById('loginModal'),
+            content: document.getElementById('loginModalContent'),
+            close: document.getElementById('closeLoginModal'),
+            form: document.getElementById('loginForm'),
+            username: document.getElementById('loginUsername'),
+            password: document.getElementById('loginPassword')
+        },
+        register: {
+            container: document.getElementById('registerModal'),
+            content: document.getElementById('registerModalContent'),
+            close: document.getElementById('closeRegisterModal'),
+            form: document.getElementById('registerForm'),
+            username: document.getElementById('registerUsername'),
+            password: document.getElementById('registerPassword'),
+            confirmPassword: document.getElementById('registerConfirmPassword')
+        },
+        addRecord: {
+            container: document.getElementById('addRecordModal'),
+            content: document.getElementById('addRecordModalContent'),
+            close: document.getElementById('closeAddRecordModal'),
+            form: document.getElementById('addRecordForm'),
+            date: document.getElementById('recordDate'),
+            severity: document.getElementById('recordSeverity'),
+            reason: document.getElementById('recordReason'),
+            reaction: document.getElementById('recordReaction'),
+            solution: document.getElementById('recordSolution'),
+            notes: document.getElementById('recordNotes')
+        },
+        recordDetail: {
+            container: document.getElementById('recordDetailModal'),
+            content: document.getElementById('recordDetailModalContent'),
+            detailContent: document.getElementById('recordDetailContent'),
+            editBtn: document.getElementById('editRecordBtn'),
+            deleteBtn: document.getElementById('deleteRecordBtn')
+        }
+    };
+
+    const navElements = {
+        home: document.getElementById('nav-home'),
+        records: document.getElementById('nav-records'),
+        about: document.getElementById('nav-about'),
+        login: document.getElementById('loginBtn'),
+        register: document.getElementById('registerBtn'),
+        userMenu: document.getElementById('userMenu'),
+        usernameDisplay: document.getElementById('usernameDisplay'),
+        logout: document.getElementById('logoutBtn'),
+        mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+        mobileMenu: document.getElementById('mobileMenu'),
+        mobileHome: document.getElementById('mobile-nav-home'),
+        mobileRecords: document.getElementById('mobile-nav-records'),
+        mobileAbout: document.getElementById('mobile-nav-about'),
+        mobileLogin: document.getElementById('mobile-loginBtn'),
+        mobileRegister: document.getElementById('mobile-registerBtn'),
+        mobileUserMenu: document.getElementById('mobile-userMenu'),
+        mobileUsernameDisplay: document.getElementById('mobile-usernameDisplay'),
+        mobileLogout: document.getElementById('mobile-logoutBtn'),
+        footerAbout: document.getElementById('footer-about')
+    };
+
+    const recordsElements = {
+        container: document.getElementById('recordsContainer'),
+        count: document.getElementById('recordCount'),
+        empty: document.getElementById('emptyRecords'),
+        addBtn: document.getElementById('addRecordBtn'),
+        emptyAddBtn: document.getElementById('empty-addRecordBtn'),
+        search: document.getElementById('searchRecords'),
+        filterMonth: document.getElementById('filterMonth'),
+        filterSeverity: document.getElementById('filterSeverity')
+    };
+
+    const otherElements = {
+        heroRegisterBtn: document.getElementById('hero-registerBtn'),
+        heroLoginBtn: document.getElementById('hero-loginBtn'),
+        switchToRegister: document.getElementById('switchToRegister'),
+        switchToLogin: document.getElementById('switchToLogin'),
+        toast: document.getElementById('toast'),
+        toastMessage: document.getElementById('toastMessage')
+    };
+
+    // 初始化应用
+    function init() {
+        // 从本地存储加载数据
+        loadData();
+
+        // 设置事件监听器
+        setupEventListeners();
+
+        // 设置默认日期为今天
+        modals.addRecord.date.valueAsDate = new Date();
+    }
+
+    // 从本地存储加载数据
+    function loadData() {
+        const savedUser = localStorage.getItem('currentUser');
+        const savedRecords = localStorage.getItem('records');
+
+        if (savedUser) {
+            state.currentUser = JSON.parse(savedUser);
+            updateAuthUI();
+        }
+
+        if (savedRecords) {
+            state.records = JSON.parse(savedRecords);
+        }
+
+        // 如果已登录，显示记录页面
+        if (state.currentUser) {
+            switchView('records');
+            renderRecords();
+        }
+    }
+
+    // 保存数据到本地存储
+    function saveData() {
+        if (state.currentUser) {
+            localStorage.setItem('currentUser', JSON.stringify(state.currentUser));
+        } else {
+            localStorage.removeItem('currentUser');
+        }
+
+        localStorage.setItem('records', JSON.stringify(state.records));
+    }
+
+    // 切换视图
+    function switchView(viewName) {
+        // 隐藏所有视图
+        Object.values(views).forEach(view => {
+            view.classList.add('hidden');
+        });
+
+        // 显示目标视图
+        views[viewName].classList.remove('hidden');
+        state.currentView = viewName;
+
+        // 更新导航状态
+        updateNavState();
+
+        // 关闭移动菜单
+        navElements.mobileMenu.classList.add('hidden');
+    }
+
+    // 更新导航状态
+    function updateNavState() {
+        // 重置所有导航项样式
+        [navElements.home, navElements.records, navElements.about].forEach(el => {
+            el.classList.remove('text-primary', 'font-bold');
+        });
+
+        [navElements.mobileHome, navElements.mobileRecords, navElements.mobileAbout].forEach(el => {
+            el.classList.remove('text-primary', 'font-bold');
+        });
+
+        // 激活当前视图导航项
+        if (state.currentView === 'home') {
+            navElements.home.classList.add('text-primary', 'font-bold');
+            navElements.mobileHome.classList.add('text-primary', 'font-bold');
+        } else if (state.currentView === 'records') {
+            navElements.records.classList.add('text-primary', 'font-bold');
+            navElements.mobileRecords.classList.add('text-primary', 'font-bold');
+        } else if (state.currentView === 'about') {
+            navElements.about.classList.add('text-primary', 'font-bold');
+            navElements.mobileAbout.classList.add('text-primary', 'font-bold');
+        }
+    }
+
+    // 更新认证相关UI
+    function updateAuthUI() {
+        if (state.currentUser) {
+            // 已登录状态
+            navElements.login.classList.add('hidden');
+            navElements.register.classList.add('hidden');
+            navElements.userMenu.classList.remove('hidden');
+            navElements.usernameDisplay.textContent = state.currentUser.username;
+
+            navElements.mobileLogin.classList.add('hidden');
+            navElements.mobileRegister.classList.add('hidden');
+            navElements.mobileUserMenu.classList.remove('hidden');
+            navElements.mobileUsernameDisplay.textContent = state.currentUser.username;
+        } else {
+            // 未登录状态
+            navElements.login.classList.remove('hidden');
+            navElements.register.classList.remove('hidden');
+            navElements.userMenu.classList.add('hidden');
+
+            navElements.mobileLogin.classList.remove('hidden');
+            navElements.mobileRegister.classList.remove('hidden');
+            navElements.mobileUserMenu.classList.add('hidden');
+        }
+    }
+
+    // 打开模态框
+    function openModal(modal) {
+        modal.container.classList.remove('hidden');
+        // 触发动画
+        setTimeout(() => {
+            modal.content.classList.remove('scale-95', 'opacity-0');
+            modal.content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    // 关闭模态框
+    function closeModal(modal) {
+        modal.content.classList.remove('scale-100', 'opacity-100');
+        modal.content.classList.add('scale-95', 'opacity-0');
+        // 隐藏模态框
+        setTimeout(() => {
+            modal.container.classList.add('hidden');
+        }, 300);
+    }
+
+    // 显示提示消息
+    function showToast(message) {
+        otherElements.toastMessage.textContent = message;
+        otherElements.toast.classList.remove('translate-y-20', 'opacity-0');
+        otherElements.toast.classList.add('translate-y-0', 'opacity-100');
+
+        // 3秒后隐藏
+        setTimeout(() => {
+            otherElements.toast.classList.remove('translate-y-0', 'opacity-100');
+            otherElements.toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+    }
+
+    // 注册用户
+    function register(username, password) {
+        // 检查用户名是否已存在
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const userExists = users.some(user => user.username === username);
+
+        if (userExists) {
+            showToast('用户名已存在');
+            return false;
+        }
+
+        // 创建新用户
+        const newUser = {
+            id: Date.now().toString(),
+            username,
+            password
+        };
+
+        // 保存用户
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+
+        // 自动登录
+        state.currentUser = newUser;
+        saveData();
+        updateAuthUI();
+
+        return true;
+    }
+
+    // 登录
+    function login(username, password) {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const user = users.find(u => u.username === username && u.password === password);
+
+        if (user) {
+            state.currentUser = user;
+            saveData();
+            updateAuthUI();
+            return true;
+        }
+
+        return false;
+    }
+
+    // 登出
+    function logout() {
+        state.currentUser = null;
+        saveData();
+        updateAuthUI();
+        switchView('home');
+        showToast('已成功退出登录');
+    }
+
+    // 添加记录
+    function addRecord(recordData) {
+        const newRecord = {
+            id: Date.now().toString(),
+            userId: state.currentUser.id,
+            ...recordData,
+            createdAt: new Date().toISOString()
+        };
+
+        state.records.push(newRecord);
+        saveData();
+        renderRecords();
+
+        return newRecord;
+    }
+
+    // 更新记录
+    function updateRecord(recordId, recordData) {
+        const index = state.records.findIndex(r => r.id === recordId);
+
+        if (index !== -1) {
+            state.records[index] = {
+                ...state.records[index],
+                ...recordData,
+                updatedAt: new Date().toISOString()
+            };
+
+            saveData();
+            renderRecords();
+            return true;
+        }
+
+        return false;
+    }
+
+    // 删除记录
+    function deleteRecord(recordId) {
+        const initialLength = state.records.length;
+        state.records = state.records.filter(r => r.id !== recordId);
+
+        if (state.records.length < initialLength) {
+            saveData();
+            renderRecords();
+            return true;
+        }
+
+        return false;
+    }
+
+    // 获取用户的记录
+    function getUserRecords() {
+        if (!state.currentUser) return [];
+        return state.records.filter(record => record.userId === state.currentUser.id)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    // 渲染记录列表
+    function renderRecords() {
+        const userRecords = getUserRecords();
+        recordsElements.count.textContent = userRecords.length;
+
+        // 清空容器
+        recordsElements.container.innerHTML = '';
+
+        if (userRecords.length === 0) {
+            // 显示空状态
+            recordsElements.empty.classList.remove('hidden');
+            return;
+        }
+
+        // 隐藏空状态
+        recordsElements.empty.classList.add('hidden');
+
+        // 应用筛选
+        let filteredRecords = [...userRecords];
+
+        // 搜索筛选
+        const searchTerm = recordsElements.search.value.toLowerCase();
+        if (searchTerm) {
+            filteredRecords = filteredRecords.filter(record =>
+                record.reason.toLowerCase().includes(searchTerm) ||
+                record.reaction.toLowerCase().includes(searchTerm) ||
+                record.solution.toLowerCase().includes(searchTerm) ||
+                record.notes.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        // 月份筛选
+        const monthFilter = recordsElements.filterMonth.value;
+        if (monthFilter !== 'all') {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            filteredRecords = filteredRecords.filter(record => {
+                const recordDate = new Date(record.date);
+                const recordMonth = recordDate.getMonth();
+                const recordYear = recordDate.getFullYear();
+
+                if (monthFilter === 'current') {
+                    return recordMonth === currentMonth && recordYear === currentYear;
+                } else if (monthFilter === 'last') {
+                    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+                    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                    return recordMonth === lastMonth && recordYear === lastMonthYear;
+                }
+                return true;
+            });
+        }
+
+        // 严重程度筛选
+        const severityFilter = recordsElements.filterSeverity.value;
+        if (severityFilter !== 'all') {
+            filteredRecords = filteredRecords.filter(record => record.severity === severityFilter);
+        }
+
+        // 如果筛选后没有结果
+        if (filteredRecords.length === 0) {
+            recordsElements.container.innerHTML = `
+          <div class="bg-white rounded-xl p-6 text-center card-shadow">
+            <i class="fa fa-search text-primary text-3xl mb-3 opacity-50"></i>
+            <p class="text-gray-600">没有找到匹配的记录</p>
+          </div>
+        `;
+            return;
+        }
+
+        // 渲染记录
+        filteredRecords.forEach(record => {
+            const severityClass = record.severity === 'mild' ? 'bg-yellow-100 text-yellow-800' :
+                record.severity === 'medium' ? 'bg-orange-100 text-orange-800' :
+                    'bg-red-100 text-red-800';
+
+            const severityText = record.severity === 'mild' ? '轻微' :
+                record.severity === 'medium' ? '中等' : '严重';
+
+            const recordElement = document.createElement('div');
+            recordElement.className = 'bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition-custom cursor-pointer';
+            recordElement.setAttribute('data-id', record.id);
+
+            recordElement.innerHTML = `
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="font-bold text-lg">${formatDate(record.date)}</h3>
+            <span class="px-2 py-1 rounded-full text-xs font-medium ${severityClass}">${severityText}</span>
+          </div>
+          <p class="text-gray-600 mb-3 line-clamp-2">${record.reason}</p>
+          <div class="flex justify-between items-center text-sm text-gray-500">
+            <span><i class="fa fa-clock-o mr-1"></i> ${getTimeAgo(record.date)}</span>
+            <button class="text-primary hover:underline view-record-btn" data-id="${record.id}">查看详情</button>
+          </div>
+        `;
+
+            recordsElements.container.appendChild(recordElement);
+
+            // 添加点击事件
+            recordElement.addEventListener('click', (e) => {
+                if (!e.target.closest('.view-record-btn')) return;
+                viewRecordDetails(record.id);
+            });
+        });
+    }
+
+    // 查看记录详情
+    function viewRecordDetails(recordId) {
+        const record = state.records.find(r => r.id === recordId);
+
+        if (!record) return;
+
+        state.editingRecordId = recordId;
+
+        const severityClass = record.severity === 'mild' ? 'bg-yellow-100 text-yellow-800' :
+            record.severity === 'medium' ? 'bg-orange-100 text-orange-800' :
+                'bg-red-100 text-red-800';
+
+        const severityText = record.severity === 'mild' ? '轻微 - 有点不开心' :
+            record.severity === 'medium' ? '中等 - 明显生气了' :
+                '严重 - 非常生气';
+
+        modals.recordDetail.detailContent.innerHTML = `
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <h4 class="text-sm font-medium text-gray-500">日期</h4>
+            <p class="font-medium">${formatDate(record.date)}</p>
+          </div>
+          <div>
+            <h4 class="text-sm font-medium text-gray-500">生气程度</h4>
+            <p><span class="px-2 py-1 rounded-full text-xs font-medium ${severityClass}">${severityText}</span></p>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-medium text-gray-500 mt-4 mb-1">生气原因</h4>
+          <p class="bg-neutral p-3 rounded-lg">${record.reason || '未记录'}</p>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-medium text-gray-500 mt-4 mb-1">她的反应</h4>
+          <p class="bg-neutral p-3 rounded-lg">${record.reaction || '未记录'}</p>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-medium text-gray-500 mt-4 mb-1">如何解决的</h4>
+          <p class="bg-neutral p-3 rounded-lg">${record.solution || '未记录'}</p>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-medium text-gray-500 mt-4 mb-1">备注</h4>
+          <p class="bg-neutral p-3 rounded-lg">${record.notes || '无'}</p>
+        </div>
+      `;
+
+        openModal(modals.recordDetail);
+    }
+
+    // 编辑记录
+    function editRecord(recordId) {
+        const record = state.records.find(r => r.id === recordId);
+
+        if (!record) return;
+
+        // 填充表单
+        modals.addRecord.date.value = record.date;
+        modals.addRecord.severity.value = record.severity;
+        modals.addRecord.reason.value = record.reason || '';
+        modals.addRecord.reaction.value = record.reaction || '';
+        modals.addRecord.solution.value = record.solution || '';
+        modals.addRecord.notes.value = record.notes || '';
+
+        // 关闭详情模态框
+        closeModal(modals.recordDetail);
+
+        // 打开添加记录模态框（用于编辑）
+        openModal(modals.addRecord);
+    }
+
+    // 格式化日期
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+    }
+
+    // 计算时间差
+    function getTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+            return '今天';
+        } else if (diffDays === 1) {
+            return '昨天';
+        } else if (diffDays < 7) {
+            return `${diffDays}天前`;
+        } else if (diffDays < 30) {
+            const weeks = Math.floor(diffDays / 7);
+            return `${weeks}周前`;
+        } else {
+            const months = Math.floor(diffDays / 30);
+            return `${months}个月前`;
+        }
+    }
+
+    // 设置事件监听器
+    function setupEventListeners() {
+        // 导航事件
+        navElements.home.addEventListener('click', () => switchView('home'));
+        navElements.records.addEventListener('click', () => {
+            if (state.currentUser) {
+                switchView('records');
+            } else {
+                openModal(modals.login);
+                showToast('请先登录');
+            }
+        });
+        navElements.about.addEventListener('click', () => switchView('about'));
+
+        // 移动端导航
+        navElements.mobileMenuBtn.addEventListener('click', () => {
+            navElements.mobileMenu.classList.toggle('hidden');
+        });
+
+        navElements.mobileHome.addEventListener('click', () => switchView('home'));
+        navElements.mobileRecords.addEventListener('click', () => {
+            if (state.currentUser) {
+                switchView('records');
+            } else {
+                openModal(modals.login);
+                showToast('请先登录');
+            }
+        });
+        navElements.mobileAbout.addEventListener('click', () => switchView('about'));
+
+        // 页脚关于链接
+        navElements.footerAbout.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView('about');
+        });
+
+        // 登录/注册按钮
+        navElements.login.addEventListener('click', () => openModal(modals.login));
+        navElements.register.addEventListener('click', () => openModal(modals.register));
+        navElements.mobileLogin.addEventListener('click', () => openModal(modals.login));
+        navElements.mobileRegister.addEventListener('click', () => openModal(modals.register));
+        otherElements.heroLoginBtn.addEventListener('click', () => openModal(modals.login));
+        otherElements.heroRegisterBtn.addEventListener('click', () => openModal(modals.register));
+
+        // 切换登录/注册
+        otherElements.switchToRegister.addEventListener('click', () => {
+            closeModal(modals.login);
+            setTimeout(() => openModal(modals.register), 300);
+        });
+
+        otherElements.switchToLogin.addEventListener('click', () => {
+            closeModal(modals.register);
+            setTimeout(() => openModal(modals.login), 300);
+        });
+
+        // 关闭模态框
+        modals.login.close.addEventListener('click', () => closeModal(modals.login));
+        modals.register.close.addEventListener('click', () => closeModal(modals.register));
+        modals.addRecord.close.addEventListener('click', () => closeModal(modals.addRecord));
+        modals.recordDetail.container.addEventListener('click', (e) => {
+            if (e.target === modals.recordDetail.container) {
+                closeModal(modals.recordDetail);
+            }
+        });
+
+        // 点击模态框外部关闭
+        modals.login.container.addEventListener('click', (e) => {
+            if (e.target === modals.login.container) {
+                closeModal(modals.login);
+            }
+        });
+
+        modals.register.container.addEventListener('click', (e) => {
+            if (e.target === modals.register.container) {
+                closeModal(modals.register);
+            }
+        });
+
+        modals.addRecord.container.addEventListener('click', (e) => {
+            if (e.target === modals.addRecord.container) {
+                closeModal(modals.addRecord);
+            }
+        });
+
+        // 登录表单提交
+        modals.login.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = modals.login.username.value.trim();
+            const password = modals.login.password.value.trim();
+
+            if (login(username, password)) {
+                closeModal(modals.login);
+                modals.login.form.reset();
+                switchView('records');
+                renderRecords();
+                showToast('登录成功');
+            } else {
+                showToast('用户名或密码错误');
+            }
+        });
+
+        // 注册表单提交
+        modals.register.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = modals.register.username.value.trim();
+            const password = modals.register.password.value.trim();
+            const confirmPassword = modals.register.confirmPassword.value.trim();
+
+            if (!username) {
+                showToast('请输入用户名');
+                return;
+            }
+
+            if (password.length < 6) {
+                showToast('密码长度至少6位');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast('两次输入的密码不一致');
+                return;
+            }
+
+            if (register(username, password)) {
+                closeModal(modals.register);
+                modals.register.form.reset();
+                switchView('records');
+                renderRecords();
+                showToast('注册成功');
+            }
+        });
+
+        // 登出
+        navElements.logout.addEventListener('click', logout);
+        navElements.mobileLogout.addEventListener('click', logout);
+
+        // 记录相关
+        recordsElements.addBtn.addEventListener('click', () => {
+            // 重置表单
+            modals.addRecord.form.reset();
+            modals.addRecord.date.valueAsDate = new Date();
+            state.editingRecordId = null;
+            openModal(modals.addRecord);
+        });
+
+        recordsElements.emptyAddBtn.addEventListener('click', () => {
+            modals.addRecord.form.reset();
+            modals.addRecord.date.valueAsDate = new Date();
+            state.editingRecordId = null;
+            openModal(modals.addRecord);
+        });
+
+        // 添加/编辑记录表单提交
+        modals.addRecord.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const recordData = {
+                date: modals.addRecord.date.value,
+                severity: modals.addRecord.severity.value,
+                reason: modals.addRecord.reason.value.trim(),
+                reaction: modals.addRecord.reaction.value.trim(),
+                solution: modals.addRecord.solution.value.trim(),
+                notes: modals.addRecord.notes.value.trim()
+            };
+
+            if (state.editingRecordId) {
+                // 编辑现有记录
+                if (updateRecord(state.editingRecordId, recordData)) {
+                    closeModal(modals.addRecord);
+                    showToast('记录已更新');
+                }
+            } else {
+                // 添加新记录
+                addRecord(recordData);
+                closeModal(modals.addRecord);
+                modals.addRecord.form.reset();
+                showToast('记录已添加');
+            }
+        });
+
+        // 记录详情操作
+        modals.recordDetail.editBtn.addEventListener('click', () => {
+            if (state.editingRecordId) {
+                editRecord(state.editingRecordId);
+            }
+        });
+
+        modals.recordDetail.deleteBtn.addEventListener('click', () => {
+            if (state.editingRecordId && confirm('确定要删除这条记录吗？')) {
+                if (deleteRecord(state.editingRecordId)) {
+                    closeModal(modals.recordDetail);
+                    showToast('记录已删除');
+                }
+            }
+        });
+
+        // 记录筛选
+        recordsElements.search.addEventListener('input', renderRecords);
+        recordsElements.filterMonth.addEventListener('change', renderRecords);
+        recordsElements.filterSeverity.addEventListener('change', renderRecords);
+    }
+
+    // 初始化应用
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
